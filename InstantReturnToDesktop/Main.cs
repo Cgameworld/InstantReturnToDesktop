@@ -14,7 +14,7 @@ namespace InstantReturnToDesktop
 
         public string Description
         {
-            get { return "Kills game executable immediately when returning to desktop"; }
+            get { return "Kills the game executable immediately when returning to desktop"; }
         }
     }
     public class ModLoading : LoadingExtensionBase
