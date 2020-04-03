@@ -5,8 +5,11 @@ using System.Reflection;
 
 namespace InstantReturnToDesktop
 {
-    public class ModInfo : IUserMod
+    public class ModInfo : LoadingExtensionBase, IUserMod
     {
+        private readonly string harmonyId = "cgameworld.instantreturntodesktop";
+        private HarmonyInstance harmony;
+
         public string Name
         {
             get { return "Instant Return To Desktop"; }
@@ -16,24 +19,29 @@ namespace InstantReturnToDesktop
         {
             get { return "Terminates the game executable immediately when returning to desktop"; }
         }
-    }
-    public class ModLoading : LoadingExtensionBase
-    {
-        public override void OnCreated(ILoading loading)
+
+        public void OnEnabled()
         {
-            base.OnCreated(loading);
-            var harmony = HarmonyInstance.Create("cgameworld.instantreturntodesktop");
+            harmony = HarmonyInstance.Create(harmonyId);
             harmony.PatchAll(Assembly.GetExecutingAssembly());
+        }
+
+        public void OnDisabled()
+        {
+            harmony.UnpatchAll(harmonyId);
+            harmony = null;
         }
     }
 
-    [HarmonyPatch(typeof(ExitConfirmPanel))]
-    [HarmonyPatch("OnExitGame")]
+    [HarmonyPatch(typeof(LoadingManager))]
+    [HarmonyPatch("QuitApplication")]
     public class Patch
     {
-        static void Prefix()
+        static bool Prefix()
         {
-            Process.GetProcessesByName("Cities")[0].Kill();
+            LoadingManager.instance.autoSaveTimer.Stop();
+            Process.GetCurrentProcess().Kill();
+            return false;
         }
     }
 }
