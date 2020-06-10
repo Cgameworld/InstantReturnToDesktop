@@ -14,14 +14,28 @@ namespace InstantReturnToDesktop
         private readonly string harmonyId = "cgameworld.instantreturntodesktop";
         private HarmonyInstance harmony;
 
-        public string Name
-        {
-            get { return "Instant Return To Desktop"; }
-        }
+        public string Name => "Instant Return To Desktop";
+        public string Description => "Terminates the game executable immediately when returning to desktop";
 
-        public string Description
+        public void OnSettingsUI(UIHelperBase helper)
         {
-            get { return "Terminates the game executable immediately when returning to desktop"; }
+            UIHelperBase group;
+
+            group = helper.AddGroup(Name);
+
+            group.AddCheckbox("Floating Terminate Button (Restart Required)", false, sel =>
+            {
+                //config.ShnGSleeperReplace = sel;
+                //Configuration<ModConfiguration>.Save();
+                Debug.LogError("d");
+            });
+
+            group.AddSpace(5);
+
+            group.AddButton("Reset Button Position", () =>
+            {
+                //ModProperties.Instance.ResetInfoPanelPosition();
+            });
         }
 
         public void OnEnabled()
@@ -103,10 +117,10 @@ namespace InstantReturnToDesktop
             {
                 Tools.Terminate();
             }
-
-            GUI.DragWindow(new Rect(0, 0, 10000, 20));
+            GUI.DragWindow(new Rect(0, 0, 10000, 20));          
         }
 
+        //get coords of window on drag! - windowBounds so saving can be done!
 
     }
 
