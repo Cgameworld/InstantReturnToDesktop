@@ -41,7 +41,7 @@ namespace InstantReturnToDesktop
             UIHelperBase group;
             group = helper.AddGroup(Name);
           
-            group.AddCheckbox("PFloating Terminate Button (Restart Required)", ModSettings.instance.FloatingButton, sel =>
+            group.AddCheckbox("Floating Terminate Button (Restart Required)", ModSettings.instance.FloatingButton, sel =>
             {
                 ModSettings.instance.FloatingButton = sel;
                 ModSettings.instance.Save();
