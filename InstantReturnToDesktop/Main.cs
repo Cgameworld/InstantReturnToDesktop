@@ -17,42 +17,51 @@ namespace InstantReturnToDesktop
         public string Name => "Instant Return To Desktop";
         public string Description => "Terminates the game executable immediately when returning to desktop";
 
-        public void OnSettingsUI(UIHelperBase helper)
-        {
-            UIHelperBase group;
-
-            group = helper.AddGroup(Name);
-
-            group.AddCheckbox("Floating Terminate Button (Restart Required)", false, sel =>
-            {
-                //config.ShnGSleeperReplace = sel;
-                //Configuration<ModConfiguration>.Save();
-                Debug.LogError("d");
-            });
-
-            group.AddSpace(5);
-
-            group.AddButton("Reset Button Position", () =>
-            {
-                //ModProperties.Instance.ResetInfoPanelPosition();
-            });
-        }
-
         public void OnEnabled()
         {
             harmony = HarmonyInstance.Create(harmonyId);
             harmony.PatchAll(Assembly.GetExecutingAssembly());
 
-            //add to load only if xml true
-            GameObject returnToDesktop = new GameObject("ReturnToDesktop");
-            returnToDesktop.AddComponent<PersistentButton>();
-            UnityEngine.Object.DontDestroyOnLoad(returnToDesktop);
+            if (ModSettings.instance.FloatingButton)
+            {
+                //loads only if xml true
+                GameObject returnToDesktop = new GameObject("ReturnToDesktop");
+                returnToDesktop.AddComponent<PersistentButton>();
+                UnityEngine.Object.DontDestroyOnLoad(returnToDesktop);
+            }
         }
 
         public void OnDisabled()
         {
             harmony.UnpatchAll(harmonyId);
             harmony = null;
+        }
+        public void OnSettingsUI(UIHelperBase helper)
+        {
+            UIHelperBase group;
+            group = helper.AddGroup(Name);
+          
+            group.AddCheckbox("PFloating Terminate Button (Restart Required)", ModSettings.instance.FloatingButton, sel =>
+            {
+                ModSettings.instance.FloatingButton = sel;
+                ModSettings.instance.Save();
+            });
+
+            if (ModSettings.instance.FloatingButton)
+            {
+                group.AddSpace(5);
+                group.AddButton("Save Button Position", () =>
+                {
+                    PersistentButton terminateButton = (PersistentButton)GameObject.Find("ReturnToDesktop").GetComponent(typeof(PersistentButton));
+                    terminateButton.SavePosition();
+                });
+
+                group.AddButton("Reset Button Position", () =>
+                {
+                    PersistentButton terminateButton = (PersistentButton)GameObject.Find("ReturnToDesktop").GetComponent(typeof(PersistentButton));
+                    terminateButton.ResetPosition();
+                });
+            }
         }
     }
 
@@ -96,32 +105,35 @@ namespace InstantReturnToDesktop
 
     public class PersistentButton : MonoBehaviour
     {
-        //also only call when option enabled!
         Rect windowBounds;
-
+        Rect buttonBounds;
         void Start()
         {
-            windowBounds = new Rect(0, 0, 120, 30);
-            // windowBounds = new Rect(0, Screen.height-30, 120, 30);
+            windowBounds = ModSettings.instance.ButtonRect;
+            buttonBounds = new Rect(5, 5, 110, 20);
         }
-
         void OnGUI()
         {
-            Debug.Log("onguicalled!");
             windowBounds = GUI.Window(321, windowBounds, DoWindow, "");
         }
-
         void DoWindow(int windowID)
         {
-            if (GUI.Button(new Rect(5, 5, 110, 20), "Terminate"))
+            if (GUI.Button(buttonBounds, "Terminate"))
             {
                 Tools.Terminate();
             }
             GUI.DragWindow(new Rect(0, 0, 10000, 20));          
         }
-
-        //get coords of window on drag! - windowBounds so saving can be done!
-
+        public void SavePosition()
+        {
+            ModSettings.instance.ButtonRect = windowBounds;
+            ModSettings.instance.Save();
+        }
+        public void ResetPosition()
+        {
+            windowBounds = new Rect(0, 0, 120, 30);
+            ModSettings.instance.ButtonRect = windowBounds;
+            ModSettings.instance.Save();
+        }
     }
-
 }

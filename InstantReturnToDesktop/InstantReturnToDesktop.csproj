@@ -57,6 +57,7 @@
   <ItemGroup>
     <Compile Include="Configuration.cs" />
     <Compile Include="Main.cs" />
+    <Compile Include="ModSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
